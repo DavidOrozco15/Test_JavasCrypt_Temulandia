@@ -74,7 +74,9 @@ function cargarProductos(productosElegidos) {
             <div class="producto-detalles">
                 <h3 class="producto-titulo">${producto.titulo}</h3>
                 <p class="producto-precio">$${producto.precio}</p>
-                <button class="producto-agregar" id="${producto.id}">Agregar</button>
+                <button class="producto-agregar icono-carrito" id="${producto.id}">
+                <img src="./img/comprar.png" alt="Eliminar producto" width="20" height="20">
+                Agregar</button>
             </div>
         `;
 
@@ -135,10 +137,14 @@ function agregarAlCarrito(e) {
         // Si el producto ya está en el carrito, aumentar su cantidad
         const index = productosEnCarrito.findIndex(producto => producto.id === idBoton);
         productosEnCarrito[index].cantidad++;
+        alert(`${productoAgregado.titulo}\nCantidad actualizada en el carrito: ${productosEnCarrito[index].cantidad}`);
+
+        
     } else {
         // Si el producto no está en el carrito, agregarlo con cantidad inicial de 1
         productoAgregado.cantidad = 1;
         productosEnCarrito.push(productoAgregado);
+        alert(`✅ Producto agregado al carrito:\n${productoAgregado.titulo}\nPrecio: $${productoAgregado.precio}`);
     }
 
     // Actualizar el contador del carrito
