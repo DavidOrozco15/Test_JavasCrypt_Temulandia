@@ -168,7 +168,7 @@ main{
 }
 
 .producto-agregar{
-    margin: 0; /* corregido para alinear con Ver más */
+    margin: 0; 
     border: 0;
     background-color: #1A1D1A;
     color: #F5F3F5;
@@ -180,7 +180,7 @@ main{
     transition: background-color .2s, color .2s;
 }
 
-/* Alineación del icono dentro del botón agregar */
+
 .producto-agregar img{
     display: inline-block;
     vertical-align: middle;
@@ -222,7 +222,7 @@ main{
 
 .producto-acciones button{
     flex: 1;
-    min-width: 0; /* evita overflow en flex */
+    min-width: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -346,10 +346,35 @@ main{
     display: none;
 }
 
-@media screen and (max-width: 850px) {
+@media screen and (max-width: 1200px),(max-width: 850px) {
     .contenedor-productos {
         grid-template-columns: 1fr 1fr 1fr;
     }
+
+    .producto-ver-mas, .producto-agregar{
+        font-size: .6rem;
+    }
+
+    .producto-agregar img{
+    display: inline-block;
+    vertical-align: middle;
+    width: 10px;
+    height: 10px;
+    }
+
+    .producto-titulo{
+        font-size: .7rem;
+    }
+
+    .producto-precio{
+        font-size: .6rem;
+    }
+
+    .logo{
+        font-size: 1.5rem;
+    }
+    
+
 }
 
 @media screen and (max-width: 675px) {
