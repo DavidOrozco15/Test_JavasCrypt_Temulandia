@@ -5,11 +5,12 @@ async function obtenerProductos() {
         const productosAPI = await respuesta.json();
 
 
-        // Transformar los datos de la API para que coincidan con el formato esperado
+        
         const productosTransformados = productosAPI.map(producto => ({
             id: `producto-${producto.id}`,
             titulo: producto.title,
             imagen: producto.image,
+            descripcion: producto.description,
             categoria: {
                 nombre: producto.category,
                 id: producto.category.toLowerCase().replace(/['\s]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") // Convertir categoría a un formato de ID
@@ -17,10 +18,10 @@ async function obtenerProductos() {
             precio: producto.price
         }));
 
-        // Cargar los productos en la página
+        
         cargarProductos(productosTransformados);
 
-        // Guardar los productos transformados en una variable global si es necesario
+        
         window.productos = productosTransformados;
 
     } catch (error) {
@@ -41,6 +42,9 @@ if (buscador) {
     buscador.addEventListener("input", filtrarProductos);
 }
 
+const ordenSelect = document.querySelector("#orden");
+if (ordenSelect) ordenSelect.addEventListener("change", filtrarProductos);
+
 function filtrarProductos() {
     const textoBusqueda = buscador.value.toLowerCase().trim();
     let productosFiltrados = window.productos;
@@ -58,7 +62,26 @@ function filtrarProductos() {
         );
     }
 
+    const criterio = ordenSelect ? ordenSelect.value : "default";
+    productosFiltrados = ordenarProductos(productosFiltrados, criterio);
+
     cargarProductos(productosFiltrados);
+}
+
+function ordenarProductos(lista, criterio) {
+    const copia = [...lista];
+    switch (criterio) {
+        case "price-asc":
+            return copia.sort((a, b) => a.precio - b.precio);
+        case "price-desc":
+            return copia.sort((a, b) => b.precio - a.precio);
+        case "title-asc":
+            return copia.sort((a, b) => a.titulo.localeCompare(b.titulo));
+        case "title-desc":
+            return copia.sort((a, b) => b.titulo.localeCompare(a.titulo));
+        default:
+            return copia; // sin ordenar
+    }
 }
 
 function cargarProductos(productosElegidos) {
@@ -74,9 +97,12 @@ function cargarProductos(productosElegidos) {
             <div class="producto-detalles">
                 <h3 class="producto-titulo">${producto.titulo.slice(0, 40)}${producto.titulo.length > 10 ? '...' : ''}</h3>
                 <p class="producto-precio">$${producto.precio}</p>
-                <button class="producto-agregar icono-carrito" id="${producto.id}">
-                <img src="./img/comprar.png" alt="Eliminar producto" width="20" height="20">
-                Agregar</button>
+                <div class="producto-acciones">
+                    <button class="producto-ver-mas" data-id="${producto.id}">Ver más</button>
+                    <button class="producto-agregar icono-carrito" id="${producto.id}">
+                        <img src="./img/comprar.png" alt="Agregar" width="20" height="20"> Agregar
+                    </button>
+                </div>
             </div>
         `;
 
@@ -85,21 +111,21 @@ function cargarProductos(productosElegidos) {
 
     actualizarBotonesAgregar();
 }
-/*se puede boorar por si acaso*/
+
 
 botonesCategorias.forEach(boton => {
     boton.addEventListener("click", (e) => {
-        // Remover la clase "active" de todos los botones y agregarla al botón seleccionado
+        
         botonesCategorias.forEach(boton => boton.classList.remove("active"));
         e.currentTarget.classList.add("active");
 
-        // Filtrar los productos según la categoría seleccionada
+        
         if (e.currentTarget.id !== "todos") {
             const productosFiltrados = window.productos.filter(producto => producto.categoria.id === e.currentTarget.id);
             tituloPrincipal.innerText = productosFiltrados[0]?.categoria.nombre || "Categoría";
             cargarProductos(productosFiltrados);
         } else {
-            // Mostrar todos los productos si se selecciona "Todos"
+        
             tituloPrincipal.innerText = "Todos los productos";
             cargarProductos(window.productos);
         }
@@ -111,6 +137,11 @@ function actualizarBotonesAgregar() {
 
     botonesAgregar.forEach(boton => {
         boton.addEventListener("click", agregarAlCarrito);
+    });
+
+    const botonesVerMas = document.querySelectorAll('.producto-ver-mas');
+    botonesVerMas.forEach(boton => {
+        boton.addEventListener('click', abrirModal);
     });
 }
 
@@ -130,27 +161,27 @@ if (productosEnCarritoLS) {
 function agregarAlCarrito(e) {
     const idBoton = e.currentTarget.id;
 
-    // Buscar el producto en la variable global `window.productos`
+    
     const productoAgregado = window.productos.find(producto => producto.id === idBoton);
 
     if (productosEnCarrito.some(producto => producto.id === idBoton)) {
-        // Si el producto ya está en el carrito, aumentar su cantidad
+        
         const index = productosEnCarrito.findIndex(producto => producto.id === idBoton);
         productosEnCarrito[index].cantidad++;
         alert(`${productoAgregado.titulo}\nCantidad actualizada en el carrito: ${productosEnCarrito[index].cantidad}`);
 
         
     } else {
-        // Si el producto no está en el carrito, agregarlo con cantidad inicial de 1
+        
         productoAgregado.cantidad = 1;
         productosEnCarrito.push(productoAgregado);
         alert(`✅ Producto agregado al carrito:\n${productoAgregado.titulo}\nPrecio: $${productoAgregado.precio}`);
     }
 
-    // Actualizar el contador del carrito
+    
     actualizarNumerito();
 
-    // Guardar el carrito actualizado en localStorage
+    
     localStorage.setItem("productos-en-carrito", JSON.stringify(productosEnCarrito));
 }
 
@@ -158,3 +189,59 @@ function actualizarNumerito() {
     let nuevoNumerito = productosEnCarrito.reduce((acc, producto) => acc + producto.cantidad, 0);
     numerito.innerText = nuevoNumerito;
 }
+
+const modalProducto = document.querySelector('#modal-producto');
+const cuerpoModal = document.querySelector('#cuerpo-modal');
+const botonCerrarModal = document.querySelector('#cerrar-modal');
+const overlayModal = document.querySelector('#overlay-modal');
+
+function abrirModal(e){
+    const id = e.currentTarget.dataset.id;
+    const producto = window.productos.find(p => p.id === id);
+    if (!producto) return;
+    renderizarModal(producto);
+    modalProducto.classList.remove('disabled');
+    modalProducto.setAttribute('aria-hidden', 'false');
+}
+
+function cerrarModal(){
+    if (!modalProducto) return;
+    modalProducto.classList.add('disabled');
+    modalProducto.setAttribute('aria-hidden', 'true');
+    cuerpoModal.innerHTML = '';
+}
+
+function renderizarModal(producto){
+    cuerpoModal.innerHTML = `
+        <img src="${producto.imagen}" alt="${producto.titulo}">
+        <div>
+            <h3 id="modal-titulo">${producto.titulo}</h3>
+            <p class="modal-categoria">Categoría: ${producto.categoria.nombre}</p>
+            <p class="modal-precio">Precio: $${producto.precio}</p>
+            <p class="modal-descripcion">${producto.descripcion || 'Sin descripción'}</p>
+            <div class="modal-acciones">
+                <button id="modal-agregar" class="producto-agregar">Agregar al carrito</button>
+                <button id="modal-cerrar" class="cerrar-modal-btn">Cerrar</button>
+            </div>
+        </div>
+    `;
+
+    const botonAgregarModal = document.querySelector('#modal-agregar');
+    botonAgregarModal.addEventListener('click', () => {
+        
+        const fakeEvent = { currentTarget: { id: producto.id } };
+        agregarAlCarrito(fakeEvent);
+        cerrarModal();
+    });
+
+    const botonCerrarInterior = document.querySelector('#modal-cerrar');
+    botonCerrarInterior.addEventListener('click', cerrarModal);
+}
+
+if (botonCerrarModal) botonCerrarModal.addEventListener('click', cerrarModal);
+if (overlayModal) overlayModal.addEventListener('click', cerrarModal);
+window.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape' && modalProducto && !modalProducto.classList.contains('disabled')){
+        cerrarModal();
+    }
+});
