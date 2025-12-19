@@ -10,6 +10,7 @@ async function obtenerProductos() {
             id: `producto-${producto.id}`,
             titulo: producto.title,
             imagen: producto.image,
+            descripcion: producto.description,
             categoria: {
                 nombre: producto.category,
                 id: producto.category.toLowerCase().replace(/['\s]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") // Convertir categoría a un formato de ID
@@ -61,7 +62,6 @@ function filtrarProductos() {
         );
     }
 
-    // Aplicar orden si se seleccionó uno
     const criterio = ordenSelect ? ordenSelect.value : "default";
     productosFiltrados = ordenarProductos(productosFiltrados, criterio);
 
@@ -97,9 +97,12 @@ function cargarProductos(productosElegidos) {
             <div class="producto-detalles">
                 <h3 class="producto-titulo">${producto.titulo.slice(0, 40)}${producto.titulo.length > 10 ? '...' : ''}</h3>
                 <p class="producto-precio">$${producto.precio}</p>
-                <button class="producto-agregar icono-carrito" id="${producto.id}">
-                <img src="./img/comprar.png" alt="Eliminar producto" width="20" height="20">
-                Agregar</button>
+                <div class="producto-acciones">
+                    <button class="producto-ver-mas" data-id="${producto.id}">Ver más</button>
+                    <button class="producto-agregar icono-carrito" id="${producto.id}">
+                        <img src="./img/comprar.png" alt="Agregar" width="20" height="20"> Agregar
+                    </button>
+                </div>
             </div>
         `;
 
@@ -134,6 +137,11 @@ function actualizarBotonesAgregar() {
 
     botonesAgregar.forEach(boton => {
         boton.addEventListener("click", agregarAlCarrito);
+    });
+
+    const botonesVerMas = document.querySelectorAll('.producto-ver-mas');
+    botonesVerMas.forEach(boton => {
+        boton.addEventListener('click', abrirModal);
     });
 }
 
@@ -181,3 +189,59 @@ function actualizarNumerito() {
     let nuevoNumerito = productosEnCarrito.reduce((acc, producto) => acc + producto.cantidad, 0);
     numerito.innerText = nuevoNumerito;
 }
+
+const modalProducto = document.querySelector('#modal-producto');
+const cuerpoModal = document.querySelector('#cuerpo-modal');
+const botonCerrarModal = document.querySelector('#cerrar-modal');
+const overlayModal = document.querySelector('#overlay-modal');
+
+function abrirModal(e){
+    const id = e.currentTarget.dataset.id;
+    const producto = window.productos.find(p => p.id === id);
+    if (!producto) return;
+    renderizarModal(producto);
+    modalProducto.classList.remove('disabled');
+    modalProducto.setAttribute('aria-hidden', 'false');
+}
+
+function cerrarModal(){
+    if (!modalProducto) return;
+    modalProducto.classList.add('disabled');
+    modalProducto.setAttribute('aria-hidden', 'true');
+    cuerpoModal.innerHTML = '';
+}
+
+function renderizarModal(producto){
+    cuerpoModal.innerHTML = `
+        <img src="${producto.imagen}" alt="${producto.titulo}">
+        <div>
+            <h3 id="modal-titulo">${producto.titulo}</h3>
+            <p class="modal-categoria">Categoría: ${producto.categoria.nombre}</p>
+            <p class="modal-precio">Precio: $${producto.precio}</p>
+            <p class="modal-descripcion">${producto.descripcion || 'Sin descripción'}</p>
+            <div class="modal-acciones">
+                <button id="modal-agregar" class="producto-agregar">Agregar al carrito</button>
+                <button id="modal-cerrar" class="cerrar-modal-btn">Cerrar</button>
+            </div>
+        </div>
+    `;
+
+    const botonAgregarModal = document.querySelector('#modal-agregar');
+    botonAgregarModal.addEventListener('click', () => {
+        
+        const fakeEvent = { currentTarget: { id: producto.id } };
+        agregarAlCarrito(fakeEvent);
+        cerrarModal();
+    });
+
+    const botonCerrarInterior = document.querySelector('#modal-cerrar');
+    botonCerrarInterior.addEventListener('click', cerrarModal);
+}
+
+if (botonCerrarModal) botonCerrarModal.addEventListener('click', cerrarModal);
+if (overlayModal) overlayModal.addEventListener('click', cerrarModal);
+window.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape' && modalProducto && !modalProducto.classList.contains('disabled')){
+        cerrarModal();
+    }
+});
