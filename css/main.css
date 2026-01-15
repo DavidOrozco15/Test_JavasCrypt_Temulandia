@@ -125,6 +125,30 @@ main {
     margin-bottom: 2rem;
 }
 
+/* ===== COPILOT: ESTILOS DEL BOTÓN HISTORIAL (AGREGADO POR COPILOT) ===== */
+/* Puede eliminarse: SÍ, sin afectar la funcionalidad base */
+.titulo-y-historial {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.boton-historial {
+    background-color: #26413C;
+    color: #F5F3F5;
+    border: 0;
+    padding: .5rem 1rem;
+    border-radius: .5rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color .2s;
+}
+
+.boton-historial:hover {
+    background-color: #3E505B;
+}
+
 .contenedor-productos {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -335,6 +359,211 @@ main {
 .carrito-acciones-vaciar:hover {
     background-color: #3E505B;
     color: #F5F3F5;
+}
+
+/* Resumen de compra */
+.carrito-resumen {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    z-index: 9999;
+}
+.carrito-resumen.disabled {
+    display: none;
+}
+.resumen-contenido {
+    background: #F5F3F5;
+    color: #03120E;
+    padding: 1.25rem;
+    border-radius: 1rem;
+    width: min(720px, 95%);
+    max-height: 80vh;
+    overflow: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    position: relative;
+}
+.resumen-lista {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    margin: .5rem 0 1rem 0;
+}
+.resumen-item {
+    display: flex;
+    justify-content: space-between;
+    gap: .5rem;
+    padding: .5rem;
+    background: #E9ECEC;
+    border-radius: .5rem;
+    align-items: center;
+}
+.resumen-item strong {
+    display: block;
+}
+.resumen-total {
+    display: flex;
+    justify-content: flex-end;
+    font-weight: 700;
+}
+.resumen-contenido .cerrar-modal {
+    position: absolute;
+    top: .5rem;
+    right: .5rem;
+    background: transparent;
+    border: 0;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* ===== COPILOT: ESTILOS DEL MODAL DE HISTORIAL (AGREGADO POR COPILOT) ===== */
+/* Puede eliminarse: SÍ, sin afectar la funcionalidad base */
+.modal-historial {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.5);
+}
+.modal-historial.disabled {
+    display: none;
+}
+.modal-historial-contenido {
+    background: #F5F3F5;
+    color: #03120E;
+    padding: 1.25rem;
+    border-radius: 1rem;
+    width: min(720px, 95%);
+    max-height: 80vh;
+    overflow: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    position: relative;
+}
+.historial-lista {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    margin: 1rem 0;
+}
+.historial-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .75rem;
+    background: #E9ECEC;
+    border-radius: .5rem;
+    cursor: pointer;
+    transition: background-color .2s;
+}
+.historial-item:hover {
+    background-color: #D4DCDD;
+}
+.historial-item-info strong {
+    display: block;
+}
+.historial-item-total {
+    font-weight: 700;
+}
+.historial-vacio {
+    text-align: center;
+    padding: 1rem;
+    color: #666;
+}
+.modal-historial-contenido .cerrar-modal {
+    position: absolute;
+    top: .5rem;
+    right: .5rem;
+    background: transparent;
+    border: 0;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* ===== COPILOT: ESTILOS DEL MODAL DE DETALLE DE COMPRA (AGREGADO POR COPILOT) ===== */
+/* Puede eliminarse: SÍ, sin afectar la funcionalidad base */
+.modal-detalle-compra {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.5);
+}
+.modal-detalle-compra.disabled {
+    display: none;
+}
+.modal-detalle-contenido {
+    background: #F5F3F5;
+    color: #03120E;
+    padding: 1.25rem;
+    border-radius: 1rem;
+    width: min(720px, 95%);
+    max-height: 80vh;
+    overflow: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    position: relative;
+}
+.detalle-fecha {
+    background: #E9ECEC;
+    padding: .5rem;
+    border-radius: .5rem;
+    margin: .5rem 0 1rem 0;
+    font-size: .9rem;
+    color: #555;
+}
+.detalle-productos {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    margin: 1rem 0;
+}
+.detalle-item {
+    display: flex;
+    justify-content: space-between;
+    gap: .5rem;
+    padding: .5rem;
+    background: #E9ECEC;
+    border-radius: .5rem;
+}
+.detalle-item strong {
+    display: block;
+}
+.detalle-subtotal {
+    font-weight: 700;
+}
+.detalle-total {
+    display: flex;
+    justify-content: flex-end;
+    font-weight: 700;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ccc;
+}
+.boton-volver-historial {
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+    background-color: #26413C;
+    color: #F5F3F5;
+    border: 0;
+    padding: .5rem 1rem;
+    border-radius: .5rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color .2s;
+}
+.boton-volver-historial:hover {
+    background-color: #3E505B;
+}
+.modal-detalle-contenido .cerrar-modal {
+    position: absolute;
+    top: .5rem;
+    right: .5rem;
+    background: transparent;
+    border: 0;
+    font-size: 1.5rem;
+    cursor: pointer;
 }
 
 .header-mobile {
