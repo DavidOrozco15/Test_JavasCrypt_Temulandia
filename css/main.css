@@ -337,6 +337,61 @@ main {
     color: #F5F3F5;
 }
 
+/* Resumen de compra */
+.carrito-resumen {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    z-index: 9999;
+}
+.carrito-resumen.disabled {
+    display: none;
+}
+.resumen-contenido {
+    background: #F5F3F5;
+    color: #03120E;
+    padding: 1.25rem;
+    border-radius: 1rem;
+    width: min(720px, 95%);
+    max-height: 80vh;
+    overflow: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    position: relative;
+}
+.resumen-lista {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    margin: .5rem 0 1rem 0;
+}
+.resumen-item {
+    display: flex;
+    justify-content: space-between;
+    gap: .5rem;
+    padding: .5rem;
+    background: #E9ECEC;
+    border-radius: .5rem;
+    align-items: center;
+}
+.resumen-item strong {
+    display: block;
+}
+.resumen-total {
+    display: flex;
+    justify-content: flex-end;
+    font-weight: 700;
+}
+.resumen-contenido .cerrar-modal {
+    position: absolute;
+    top: .5rem;
+    right: .5rem;
+    background: transparent;
+    border: 0;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
 .header-mobile {
     display: none;
 }
