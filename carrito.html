@@ -38,7 +38,10 @@
             </footer>
         </aside>
         <main>
-            <h2 class="titulo-principal">Carrousel de Compras</h2>
+            <div class="titulo-y-historial">
+                <h2 class="titulo-principal">Carrousel de Compras</h2>
+                <button id="boton-historial" class="boton-historial">📋 Historial de Compras</button>
+            </div>
             <div class="contenedor-carrito">
                 <p id="carrito-vacio" class="carrito-vacio">Carrito Vacio :c</p>
                 <div id="carrito-productos" class="carrito-productos disabled">
@@ -63,6 +66,26 @@
                         <h3>Resumen de la compra</h3>
                         <div id="resumen-lista" class="resumen-lista"></div>
                         <div class="resumen-total"><strong>Total:</strong> <span id="resumen-total">$0.00</span></div>
+                    </div>
+                </div>
+
+                <div id="modal-historial" class="modal-historial disabled" aria-hidden="true">
+                    <div class="modal-historial-contenido">
+                        <button id="historial-cerrar" class="cerrar-modal" aria-label="Cerrar historial">×</button>
+                        <h3>Historial de Compras</h3>
+                        <div id="historial-lista" class="historial-lista"></div>
+                        <p id="historial-vacio" class="historial-vacio">No tienes compras registradas</p>
+                    </div>
+                </div>
+
+                <div id="modal-detalle-compra" class="modal-detalle-compra disabled" aria-hidden="true">
+                    <div class="modal-detalle-contenido">
+                        <button id="detalle-cerrar" class="cerrar-modal" aria-label="Cerrar">×</button>
+                        <h3>Detalle de Compra</h3>
+                        <div class="detalle-fecha"></div>
+                        <div id="detalle-productos" class="detalle-productos"></div>
+                        <div class="detalle-total"><strong>Total:</strong> <span id="detalle-total-span">$0.00</span></div>
+                        <button id="volver-historial" class="boton-volver-historial">Volver al Historial</button>
                     </div>
                 </div>
             </div>

@@ -1,4 +1,5 @@
 let productosEnCarrito = JSON.parse(localStorage.getItem("productos-en-carrito")) || [];
+let historialCompras = JSON.parse(localStorage.getItem("historial-compras")) || [];
 
 const contenedorCarritoVacio = document.querySelector("#carrito-vacio");
 const contenedorCarritoProductos = document.querySelector("#carrito-productos");
@@ -8,6 +9,7 @@ let botonesEliminar = document.querySelectorAll(".carrito-producto-eliminar");
 const botonVaciar = document.querySelector("#carrito-acciones-vaciar");
 const contenedorTotal = document.querySelector("#total");
 const botonComprar = document.querySelector("#carrito-acciones-comprar");
+const botonHistorial = document.querySelector("#boton-historial");
 
 
 function cargarProductosCarrito() {
@@ -111,6 +113,16 @@ function comprarCarrito() {
     const productosComprados = productosEnCarrito.map(p => ({ ...p }));
     const totalCompra = productosEnCarrito.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
 
+    // Guardar en historial
+    const compra = {
+        id: Date.now(),
+        fecha: new Date().toLocaleString('es-ES'),
+        productos: productosComprados,
+        total: totalCompra
+    };
+    historialCompras.push(compra);
+    localStorage.setItem("historial-compras", JSON.stringify(historialCompras));
+
     // Renderizar resumen antes de vaciar
     renderizarResumenCompra(productosComprados, totalCompra);
 
@@ -163,4 +175,107 @@ function renderizarResumenCompra(productosComprados, total) {
         contenedorCarritoComprado.classList.remove('disabled');
     });
 }
+}
+
+// ===== HISTORIAL DE COMPRAS =====
+if (botonHistorial) {
+    botonHistorial.addEventListener('click', mostrarHistorial);
+}
+
+function mostrarHistorial() {
+    const modalHistorial = document.querySelector('#modal-historial');
+    const historiallista = document.querySelector('#historial-lista');
+    const historiallVacio = document.querySelector('#historial-vacio');
+
+    if (!modalHistorial) return;
+
+    if (historialCompras && historialCompras.length > 0) {
+        historiallVacio.classList.add('disabled');
+        historiallista.innerHTML = '';
+
+        historialCompras.forEach((compra, index) => {
+            const item = document.createElement('div');
+            item.classList.add('historial-item');
+            item.innerHTML = `
+                <div class="historial-item-info">
+                    <strong>Compra #${index + 1}</strong>
+                    <div>${compra.fecha}</div>
+                    <div>${compra.productos.length} producto(s)</div>
+                </div>
+                <div class="historial-item-total">${compra.total.toFixed(2)}$</div>
+            `;
+            item.addEventListener('click', () => mostrarDetalleCompra(compra.id));
+            historiallista.appendChild(item);
+        });
+    } else {
+        historiallVacio.classList.remove('disabled');
+        historiallista.innerHTML = '';
+    }
+
+    modalHistorial.classList.remove('disabled');
+    modalHistorial.setAttribute('aria-hidden', 'false');
+
+    const btnCerrarHistorial = document.querySelector('#historial-cerrar');
+    if (btnCerrarHistorial) {
+        btnCerrarHistorial.onclick = () => {
+            modalHistorial.classList.add('disabled');
+            modalHistorial.setAttribute('aria-hidden', 'true');
+        };
+    }
+}
+
+function mostrarDetalleCompra(compraId) {
+    const compra = historialCompras.find(c => c.id === compraId);
+    if (!compra) return;
+
+    const modalDetalle = document.querySelector('#modal-detalle-compra');
+    const detalleProductos = document.querySelector('#detalle-productos');
+    const detalleFecha = document.querySelector('.detalle-fecha');
+    const detalleTotal = document.querySelector('#detalle-total-span');
+    const modalHistorial = document.querySelector('#modal-historial');
+
+    if (!modalDetalle || !detalleProductos || !detalleFecha) return;
+
+    detalleFecha.innerHTML = `<strong>Fecha:</strong> ${compra.fecha}`;
+    detalleProductos.innerHTML = '';
+
+    compra.productos.forEach(p => {
+        const item = document.createElement('div');
+        item.classList.add('detalle-item');
+        item.innerHTML = `
+            <div class="detalle-info">
+                <strong>${p.titulo}</strong>
+                <div>Categoría: ${p.categoria?.nombre || ''}</div>
+                <div>Precio unitario: $${Number(p.precio).toFixed(2)}</div>
+                <div>Cantidad: ${p.cantidad}</div>
+            </div>
+            <div class="detalle-subtotal">$${(p.precio * p.cantidad).toFixed(2)}</div>
+        `;
+        detalleProductos.appendChild(item);
+    });
+
+    detalleTotal.innerText = `$${Number(compra.total).toFixed(2)}`;
+
+    // Cerrar historial y abrir detalle
+    modalHistorial.classList.add('disabled');
+    modalDetalle.classList.remove('disabled');
+    modalDetalle.setAttribute('aria-hidden', 'false');
+
+    const btnCerrarDetalle = document.querySelector('#detalle-cerrar');
+    if (btnCerrarDetalle) {
+        btnCerrarDetalle.onclick = () => {
+            modalDetalle.classList.add('disabled');
+            modalDetalle.setAttribute('aria-hidden', 'true');
+            mostrarHistorial();
+        };
+    }
+
+    const btnVolverHistorial = document.querySelector('#volver-historial');
+    if (btnVolverHistorial) {
+        btnVolverHistorial.onclick = () => {
+            modalDetalle.classList.add('disabled');
+            modalDetalle.setAttribute('aria-hidden', 'true');
+            mostrarHistorial();
+        };
+    }
 }
