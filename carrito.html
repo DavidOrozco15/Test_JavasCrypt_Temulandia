@@ -38,8 +38,10 @@
             </footer>
         </aside>
         <main>
+            <!-- COPILOT: Contenedor flex para alinear título y botón de historial -->
             <div class="titulo-y-historial">
                 <h2 class="titulo-principal">Carrousel de Compras</h2>
+                <!-- COPILOT: Botón para abrir modal de historial de compras (AGREGADO POR COPILOT) -->
                 <button id="boton-historial" class="boton-historial">📋 Historial de Compras</button>
             </div>
             <div class="contenedor-carrito">
@@ -60,6 +62,8 @@
                     </div>
                 </div>
                 <p id="carrito-comprado" class="carrito-comprado disabled">Muchas Gracias por tu compra</p>
+                <!-- COPILOT: Modal del resumen de compra (AGREGADO POR COPILOT) -->
+                <!-- Puede eliminarse: SI, pero afectaría el resumen que se muestra al comprar -->
                 <div id="carrito-resumen" class="carrito-resumen disabled" aria-hidden="true">
                     <div class="resumen-contenido">
                         <button id="resumen-cerrar" class="cerrar-modal" aria-label="Cerrar resumen">×</button>
@@ -69,6 +73,8 @@
                     </div>
                 </div>
 
+                <!-- COPILOT: Modal del historial de compras (AGREGADO POR COPILOT) -->
+                <!-- Puede eliminarse: SÍ, completamente, sin afectar funcionalidad base del carrito -->
                 <div id="modal-historial" class="modal-historial disabled" aria-hidden="true">
                     <div class="modal-historial-contenido">
                         <button id="historial-cerrar" class="cerrar-modal" aria-label="Cerrar historial">×</button>
@@ -78,6 +84,8 @@
                     </div>
                 </div>
 
+                <!-- COPILOT: Modal de detalle de una compra específica (AGREGADO POR COPILOT) -->
+                <!-- Puede eliminarse: SÍ, completamente, sin afectar funcionalidad base del carrito -->
                 <div id="modal-detalle-compra" class="modal-detalle-compra disabled" aria-hidden="true">
                     <div class="modal-detalle-contenido">
                         <button id="detalle-cerrar" class="cerrar-modal" aria-label="Cerrar">×</button>

@@ -1,4 +1,6 @@
 let productosEnCarrito = JSON.parse(localStorage.getItem("productos-en-carrito")) || [];
+// COPILOT: Variable para guardar el historial de todas las compras (AGREGADA POR COPILOT)
+// Puede eliminarse: SÍ, sin afectar la funcionalidad base del carrito
 let historialCompras = JSON.parse(localStorage.getItem("historial-compras")) || [];
 
 const contenedorCarritoVacio = document.querySelector("#carrito-vacio");
@@ -9,6 +11,8 @@ let botonesEliminar = document.querySelectorAll(".carrito-producto-eliminar");
 const botonVaciar = document.querySelector("#carrito-acciones-vaciar");
 const contenedorTotal = document.querySelector("#total");
 const botonComprar = document.querySelector("#carrito-acciones-comprar");
+// COPILOT: Selector para el botón de historial (AGREGADO POR COPILOT)
+// Puede eliminarse: SÍ, sin afectar la funcionalidad base del carrito
 const botonHistorial = document.querySelector("#boton-historial");
 
 
@@ -113,7 +117,8 @@ function comprarCarrito() {
     const productosComprados = productosEnCarrito.map(p => ({ ...p }));
     const totalCompra = productosEnCarrito.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
 
-    // Guardar en historial
+    // COPILOT: Guardar la compra en el historial de compras (AGREGADO POR COPILOT)
+    // Puede eliminarse: SÍ, pero afectaría la funcionalidad del historial
     const compra = {
         id: Date.now(),
         fecha: new Date().toLocaleString('es-ES'),
@@ -177,7 +182,8 @@ function renderizarResumenCompra(productosComprados, total) {
 }
 }
 
-// ===== HISTORIAL DE COMPRAS =====
+// ===== COPILOT: FUNCIONES DEL HISTORIAL DE COMPRAS (AGREGADAS POR COPILOT) =====
+// Puede eliminarse: SÍ, completamente, sin afectar la funcionalidad base del carrito
 if (botonHistorial) {
     botonHistorial.addEventListener('click', mostrarHistorial);
 }
@@ -279,3 +285,4 @@ function mostrarDetalleCompra(compraId) {
         };
     }
 }
+// ===== FIN DE CÓDIGO COPILOT =====
