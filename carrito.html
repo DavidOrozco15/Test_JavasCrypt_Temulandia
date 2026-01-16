@@ -43,6 +43,8 @@
                 <h2 class="titulo-principal">Carrousel de Compras</h2>
                 <!-- COPILOT: Botón para abrir modal de historial de compras (AGREGADO POR COPILOT) -->
                 <button id="boton-historial" class="boton-historial">📋 Historial de Compras</button>
+                <!-- COPILOT: Botón para cerrar sesión (AGREGADO POR COPILOT) -->
+                <button id="boton-logout" class="boton-historial" style="display: none;">🚪 Cerrar Sesión</button>
             </div>
             <div class="contenedor-carrito">
                 <p id="carrito-vacio" class="carrito-vacio">Carrito Vacio :c</p>
@@ -62,6 +64,66 @@
                     </div>
                 </div>
                 <p id="carrito-comprado" class="carrito-comprado disabled">Muchas Gracias por tu compra</p>
+                
+                <!-- NUEVO: Modal de formulario de datos de entrega -->
+                <div id="modal-formulario-compra" class="modal-formulario disabled" aria-hidden="true">
+                    <div class="formulario-overlay"></div>
+                    <div class="formulario-contenido">
+                        <button class="cerrar-formulario" id="cerrar-formulario">✕</button>
+                        <h2>Información de Entrega</h2>
+                        <form id="form-compra">
+                            <div class="form-grupo">
+                                <label for="nombres">Nombres *</label>
+                                <input type="text" id="nombres" name="nombres" required>
+                            </div>
+                            
+                            <div class="form-grupo">
+                                <label for="correo">Correo *</label>
+                                <input type="email" id="correo" name="correo" readonly>
+                            </div>
+                            
+                            <div class="form-grupo">
+                                <label for="telefono">Teléfono *</label>
+                                <input type="tel" id="telefono" name="telefono" required>
+                            </div>
+                            
+                            <div class="form-grupo">
+                                <label for="direccion">Dirección *</label>
+                                <input type="text" id="direccion" name="direccion" required>
+                            </div>
+                            
+                            <div class="form-fila">
+                                <div class="form-grupo">
+                                    <label for="ciudad">Ciudad *</label>
+                                    <input type="text" id="ciudad" name="ciudad" required>
+                                </div>
+                                <div class="form-grupo">
+                                    <label for="departamento">Departamento *</label>
+                                    <input type="text" id="departamento" name="departamento" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-grupo">
+                                <label for="codigo-postal">Código Postal *</label>
+                                <input type="text" id="codigo-postal" name="codigo-postal" required>
+                            </div>
+                            
+                            <div class="form-grupo">
+                                <label for="metodo-pago">Método de Pago *</label>
+                                <select id="metodo-pago" name="metodo-pago" required>
+                                    <option value="">-- Selecciona un método --</option>
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="tarjeta">Tarjeta</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-error" id="form-error"></div>
+                            
+                            <button type="submit" class="btn-completar">Completar Compra</button>
+                        </form>
+                    </div>
+                </div>
+                
                 <!-- COPILOT: Modal del resumen de compra (AGREGADO POR COPILOT) -->
                 <!-- Puede eliminarse: SI, pero afectaría el resumen que se muestra al comprar -->
                 <div id="carrito-resumen" class="carrito-resumen disabled" aria-hidden="true">
@@ -100,6 +162,7 @@
         </main>
     </div>
     
+    <script src="./js/auth.js"></script>
     <script src="./js/carrito.js"></script>
     <script src="./js/menu.js"></script>
 </body>

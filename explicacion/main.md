@@ -541,3 +541,35 @@ window.addEventListener('keydown', (e)=>{
 4. **Agregar:** Click en "Agregar" → `agregarAlCarrito()` añade/incrementa en el carrito
 
 ---
+## 🔐 Integración con Sistema de Autenticación
+
+Este archivo (`main.js`) llama funciones del sistema de autenticación (`auth.js`):
+
+### Botón de Cerrar Sesión (línea 265-266)
+
+```javascript
+if (hayUsuarioLogueado()) {
+    cerrarSesion();
+}
+```
+
+- `hayUsuarioLogueado()`: Verifica si hay usuario logueado
+- `cerrarSesion()`: Cierra sesión y limpia carrito
+
+### Mostrar nombre de usuario (línea 348-349)
+
+```javascript
+if (hayUsuarioLogueado()) {
+    const usuario = obtenerNombreUsuario();
+```
+
+- `obtenerNombreUsuario()`: Obtiene el email del usuario logueado
+- Se usa para personalizar la interfaz (mostrar quién está logueado)
+
+### Relación con carrito.js
+
+- Cuando un usuario logueado compra, `carrito.js` llama:
+  - `guardarCompraUsuario(compra)`: Guarda en historial del usuario
+  - `obtenerHistorialUsuario()`: Obtiene compras previas del usuario
+
+---

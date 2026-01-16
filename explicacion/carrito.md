@@ -4,19 +4,22 @@
 
 ---
 
-## 🔍 Índice de funciones (CÓDIGO ORIGINAL)
+## 🔍 Índice de funciones
 
+### CÓDIGO ORIGINAL
 1. **cargarProductosCarrito()** - Renderiza los productos en el carrito
 2. **actualizarBotonesEliminar()** - Asigna eventos a botones de eliminar
 3. **eliminarDelCarrito()** - Elimina un producto del carrito
 4. **vaciarCarrito()** - Vacía completamente el carrito
 5. **actualizarTotal()** - Recalcula y muestra el total
-6. **comprarCarrito()** - Procesa la compra
-7. **renderizarResumenCompra()** - Muestra resumen de la compra
+6. **comprarCarrito()** - Procesa la compra (MODIFICADO en actualización)
+7. **renderizarResumenCompra()** - Muestra resumen de la compra (MODIFICADO en actualización)
 
-**FUNCIONES COPILOT (no se detallan):**
-- `mostrarHistorial()` - Abre modal del historial
-- `mostrarDetalleCompra()` - Muestra detalles de una compra específica
+### NUEVAS FUNCIONES (Actualización: Formulario de Compra)
+8. **mostrarFormularioCompra()** - Abre modal con formulario de datos del cliente
+9. **completarCompra(datosCliente)** - Procesa la compra con datos del cliente
+10. **mostrarHistorial()** - Abre modal del historial de compras del usuario
+11. **mostrarDetalleCompra(compraId)** - Muestra detalles de una compra específica
 
 ---
 
@@ -381,10 +384,443 @@ function renderizarResumenCompra(productosComprados, total) {
 
 ## ⚠️ Nota sobre código COPILOT
 
-Las siguientes funciones fueron agregadas por Copilot y se describen sin detalle:
-- `mostrarHistorial()` (línea 203 en adelante)
-- `mostrarDetalleCompra()` (línea 244 en adelante)
-
-Para entender estas funciones, ver comentarios en el código o el archivo [COMENTARIOS_COPILOT.md]
+Las siguientes funciones fueron agregadas en actualización y se describen con detalle:
+- `mostrarFormularioCompra()` (línea 127 en adelante) - **NUEVA**
+- `completarCompra(datosCliente)` (línea 141 en adelante) - **NUEVA**
+- `mostrarHistorial()` (línea 185 en adelante)
+- `mostrarDetalleCompra(compraId)` (línea 230 en adelante)
 
 ---
+
+## 🆕 ACTUALIZACIÓN: Formulario de Compra
+
+### Flujo modificado de compra
+
+Antes (v1):
+```
+Click "Comprar" → Resumen → Guardar
+```
+
+Ahora (v2):
+```
+Click "Comprar" → FORMULARIO (datos del cliente) → Resumen con datos → Guardar
+```
+
+---
+
+## 9️⃣ comprarCarrito() [MODIFICADO]
+
+```javascript
+function comprarCarrito() {
+    if (!productosEnCarrito || productosEnCarrito.length === 0) return;
+
+    // Mostrar formulario de datos de entrega
+    mostrarFormularioCompra();
+}
+```
+
+**Cambio:** Ahora solo verifica que haya productos y abre el formulario. No directamente el resumen.
+
+---
+
+## 🔟 mostrarFormularioCompra() [NUEVO]
+
+```javascript
+function mostrarFormularioCompra() {
+    const modalFormulario = document.querySelector('#modal-formulario-compra');
+    const inputCorreo = document.querySelector('#correo');
+    
+    if (!modalFormulario) return;
+    
+    // Pre-llenar el correo con el del usuario logueado
+    inputCorreo.value = obtenerNombreUsuario();
+    
+    // Mostrar modal
+    modalFormulario.classList.remove('disabled');
+    modalFormulario.setAttribute('aria-hidden', 'false');
+}
+```
+
+**Línea 127-140:**
+- Selecciona el modal del formulario
+- Selecciona el campo de correo
+- Valida que exista el modal
+- Pre-llena el correo del usuario logueado usando `obtenerNombreUsuario()` (función de `auth.js`)
+- Muestra el modal removiendo clase "disabled"
+- Actualiza atributo de accesibilidad para lectores de pantalla
+
+---
+
+## 1️⃣1️⃣ completarCompra(datosCliente) [NUEVO]
+
+```javascript
+function completarCompra(datosCliente) {
+    // Snapshot de la compra
+    const productosComprados = productosEnCarrito.map(p => ({ ...p }));
+    const totalCompra = productosEnCarrito.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
+
+    // Crear objeto de compra con datos del cliente
+    const compra = {
+        id: Date.now(),
+        fecha: new Date().toLocaleString('es-ES'),
+        productos: productosComprados,
+        total: totalCompra,
+        cliente: datosCliente  // Incluir datos del cliente
+    };
+```
+
+**Línea 141-155:**
+- Crea una copia (snapshot) de los productos en ese momento
+- Calcula el total
+- Crea un objeto `compra` con:
+  - `id`: timestamp actual (único para cada compra)
+  - `fecha`: fecha/hora actual en formato español
+  - `productos`: array de productos comprados
+  - `total`: cantidad total
+  - `cliente`: objeto con datos del cliente (nombres, teléfono, dirección, etc.)
+
+```javascript
+    // Guardar compra
+    guardarCompraUsuario(compra);
+
+    // Renderizar resumen con datos del cliente
+    renderizarResumenCompra(productosComprados, totalCompra, datosCliente);
+
+    // Vaciar carrito y persistir
+    productosEnCarrito.length = 0;
+    localStorage.setItem("productos-en-carrito", JSON.stringify(productosEnCarrito));
+
+    // Actualizar vista del carrito
+    cargarProductosCarrito();
+    contenedorCarritoVacio.classList.add("disabled");
+    contenedorCarritoProductos.classList.add("disabled");
+    contenedorCarritoAcciones.classList.add("disabled");
+    contenedorCarritoComprado.classList.add("disabled");
+    
+    // Cerrar formulario
+    const modalFormulario = document.querySelector('#modal-formulario-compra');
+    modalFormulario.classList.add('disabled');
+}
+```
+
+**Línea 157-174:**
+- `guardarCompraUsuario(compra)`: Guarda la compra en localStorage para el usuario logueado (función de `auth.js`)
+- `renderizarResumenCompra()`: Muestra el resumen AHORA INCLUYENDO los datos del cliente (ver parámetro nuevo)
+- Limpia el carrito (longitud 0)
+- Guarda el carrito vacío en localStorage
+- Recarga la vista del carrito
+- Oculta todos los elementos del carrito
+- Cierra el modal del formulario
+
+---
+
+## 1️⃣2️⃣ renderizarResumenCompra() [MODIFICADO]
+
+```javascript
+function renderizarResumenCompra(productosComprados, total, datosCliente = null) {
+    const resumenContenedor = document.querySelector('#carrito-resumen');
+    const lista = document.querySelector('#resumen-lista');
+    const totalSpan = document.querySelector('#resumen-total');
+
+    if (!resumenContenedor || !lista || !totalSpan) return;
+
+    lista.innerHTML = '';
+    
+    // Si hay datos del cliente, mostrarlos primero
+    if (datosCliente) {
+        const seccionCliente = document.createElement('div');
+        seccionCliente.className = 'resumen-seccion-cliente';
+        seccionCliente.innerHTML = `
+            <h3>Información de Entrega</h3>
+            <div class="resumen-cliente-info">
+                <p><strong>Nombres:</strong> ${datosCliente.nombres}</p>
+                <p><strong>Correo:</strong> ${datosCliente.correo}</p>
+                <p><strong>Teléfono:</strong> ${datosCliente.telefono}</p>
+                <p><strong>Dirección:</strong> ${datosCliente.direccion}</p>
+                <p><strong>Ciudad:</strong> ${datosCliente.ciudad}</p>
+                <p><strong>Departamento:</strong> ${datosCliente.departamento}</p>
+                <p><strong>Código Postal:</strong> ${datosCliente.codigoPostal}</p>
+                <p><strong>Método de Pago:</strong> ${datosCliente.metodoPago === 'efectivo' ? 'Efectivo' : 'Tarjeta'}</p>
+            </div>
+        `;
+        lista.appendChild(seccionCliente);
+        
+        // Agregar separador
+        const separador = document.createElement('hr');
+        lista.appendChild(separador);
+    }
+```
+
+**Cambio en firma:** Ahora acepta parámetro `datosCliente = null` (opcional)
+
+**Línea 182-208:**
+- Si se proporciona `datosCliente` (objeto con nombres, correo, teléfono, etc.):
+  - Crea una sección con clase "resumen-seccion-cliente"
+  - Muestra todos los datos de entrega del cliente
+  - El ternario convierte "efectivo"/"tarjeta" a texto legible
+  - Agrega un `<hr>` (línea) como separador visual
+
+```javascript
+    // Mostrar productos
+    const seccionProductos = document.createElement('div');
+    seccionProductos.className = 'resumen-seccion-productos';
+    seccionProductos.innerHTML = '<h3>Productos Comprados</h3>';
+    
+    productosComprados.forEach(p => {
+        const item = document.createElement('div');
+        item.classList.add('resumen-item');
+        item.innerHTML = `
+            <div class="resumen-info">
+                <strong>${p.titulo}</strong>
+                <div>Categoria: ${p.categoria?.nombre || ''}</div>
+                <div>Precio unitario: $${Number(p.precio).toFixed(2)}</div>
+                <div>Cantidad: ${p.cantidad}</div>
+            </div>
+            <div class="resumen-subtotal">$${(p.precio * p.cantidad).toFixed(2)}</div>
+        `;
+        seccionProductos.appendChild(item);
+    });
+    lista.appendChild(seccionProductos);
+```
+
+**Línea 210-225:**
+- Crea sección de productos con clase "resumen-seccion-productos"
+- Por cada producto, muestra título, categoría, precio unitario, cantidad y subtotal
+- Estructura igual que antes, solo se coloca DESPUÉS de la sección de cliente (si existe)
+
+---
+
+## 1️⃣3️⃣ mostrarHistorial() [COPILOT - FUNCIONA CON DATOS DEL CLIENTE]
+
+```javascript
+function mostrarHistorial() {
+    const modalHistorial = document.querySelector('#modal-historial');
+    const historiallista = document.querySelector('#historial-lista');
+    const historiallVacio = document.querySelector('#historial-vacio');
+
+    if (!modalHistorial) return;
+
+    // Obtener historial del usuario actual
+    const historialActual = hayUsuarioLogueado() ? obtenerHistorialUsuario() : [];
+    
+    if (historialActual && historialActual.length > 0) {
+        historiallVacio.classList.add('disabled');
+        historiallista.innerHTML = '';
+
+        historialActual.forEach((compra, index) => {
+            const item = document.createElement('div');
+            item.classList.add('historial-item');
+            item.innerHTML = `
+                <div class="historial-item-info">
+                    <strong>Compra #${index + 1}</strong>
+                    <div>${compra.fecha}</div>
+                    <div>${compra.productos.length} producto(s)</div>
+                </div>
+                <div class="historial-item-total">${compra.total.toFixed(2)}$</div>
+            `;
+            item.addEventListener('click', () => mostrarDetalleCompra(compra.id));
+            historiallista.appendChild(item);
+        });
+        
+        modalHistorial.classList.remove('disabled');
+    } else {
+        historiallVacio.classList.remove('disabled');
+        historiallista.innerHTML = '';
+    }
+
+    modalHistorial.classList.remove('disabled');
+    modalHistorial.setAttribute('aria-hidden', 'false');
+
+    const btnCerrarHistorial = document.querySelector('#historial-cerrar');
+    if (btnCerrarHistorial) {
+        btnCerrarHistorial.onclick = () => {
+            modalHistorial.classList.add('disabled');
+            modalHistorial.setAttribute('aria-hidden', 'true');
+        };
+    }
+}
+```
+
+**Línea 227-273:**
+- Abre el modal del historial
+- Obtiene el historial del usuario logueado usando `obtenerHistorialUsuario()` de `auth.js`
+- Si hay compras:
+  - Las itera y crea items con: número de compra, fecha, cantidad de productos, total
+  - Asigna evento click a cada item para ver detalles
+  - Oculta mensaje de "historial vacío"
+- Si NO hay compras:
+  - Muestra mensaje de historial vacío
+- Asigna evento al botón cerrar para ocultar el modal
+
+---
+
+## 1️⃣4️⃣ mostrarDetalleCompra(compraId) [COPILOT - MUESTRA DATOS DEL CLIENTE]
+
+```javascript
+function mostrarDetalleCompra(compraId) {
+    const compra = obtenerHistorialUsuario().find(c => c.id === compraId);
+    if (!compra) return;
+
+    const modalDetalle = document.querySelector('#modal-detalle-compra');
+    const detalleProductos = document.querySelector('#detalle-productos');
+    const detalleFecha = document.querySelector('.detalle-fecha');
+    const detalleTotal = document.querySelector('#detalle-total-span');
+    const modalHistorial = document.querySelector('#modal-historial');
+
+    if (!modalDetalle || !detalleProductos || !detalleFecha) return;
+
+    detalleFecha.innerHTML = `<strong>Fecha:</strong> ${compra.fecha}`;
+    detalleProductos.innerHTML = '';
+    
+    // Si hay datos del cliente, mostrarlos primero
+    if (compra.cliente) {
+        const seccionCliente = document.createElement('div');
+        seccionCliente.className = 'resumen-seccion-cliente';
+        seccionCliente.innerHTML = `
+            <h3>Información de Entrega</h3>
+            <div class="resumen-cliente-info">
+                <p><strong>Nombres:</strong> ${compra.cliente.nombres}</p>
+                <p><strong>Correo:</strong> ${compra.cliente.correo}</p>
+                <p><strong>Teléfono:</strong> ${compra.cliente.telefono}</p>
+                <p><strong>Dirección:</strong> ${compra.cliente.direccion}</p>
+                <p><strong>Ciudad:</strong> ${compra.cliente.ciudad}</p>
+                <p><strong>Departamento:</strong> ${compra.cliente.departamento}</p>
+                <p><strong>Código Postal:</strong> ${compra.cliente.codigoPostal}</p>
+                <p><strong>Método de Pago:</strong> ${compra.cliente.metodoPago === 'efectivo' ? 'Efectivo' : 'Tarjeta'}</p>
+            </div>
+        `;
+        detalleProductos.appendChild(seccionCliente);
+        
+        // Agregar separador
+        const separador = document.createElement('hr');
+        detalleProductos.appendChild(separador);
+    }
+    
+    // Mostrar productos
+    const seccionProductos = document.createElement('div');
+    seccionProductos.className = 'resumen-seccion-productos';
+    seccionProductos.innerHTML = '<h3>Productos Comprados</h3>';
+
+    compra.productos.forEach(p => {
+        const item = document.createElement('div');
+        item.classList.add('detalle-item');
+        item.innerHTML = `
+            <div class="detalle-info">
+                <strong>${p.titulo}</strong>
+                <div>Categoría: ${p.categoria?.nombre || ''}</div>
+                <div>Precio unitario: $${Number(p.precio).toFixed(2)}</div>
+                <div>Cantidad: ${p.cantidad}</div>
+            </div>
+            <div class="detalle-subtotal">$${(p.precio * p.cantidad).toFixed(2)}</div>
+        `;
+        seccionProductos.appendChild(item);
+    });
+    
+    detalleProductos.appendChild(seccionProductos);
+
+    detalleTotal.innerText = `$${Number(compra.total).toFixed(2)}`;
+
+    // Cerrar historial y abrir detalle
+    modalHistorial.classList.add('disabled');
+    modalDetalle.classList.remove('disabled');
+    modalDetalle.setAttribute('aria-hidden', 'false');
+
+    const btnCerrarDetalle = document.querySelector('#detalle-cerrar');
+    if (btnCerrarDetalle) {
+        btnCerrarDetalle.onclick = () => {
+            modalDetalle.classList.add('disabled');
+            modalDetalle.setAttribute('aria-hidden', 'true');
+            mostrarHistorial();
+        };
+    }
+
+    const btnVolverHistorial = document.querySelector('#volver-historial');
+    if (btnVolverHistorial) {
+        btnVolverHistorial.onclick = () => {
+            modalDetalle.classList.add('disabled');
+            modalDetalle.setAttribute('aria-hidden', 'true');
+            mostrarHistorial();
+        };
+    }
+}
+```
+
+**Línea 275-359:**
+- Busca la compra por ID usando `find()`
+- Valida que exista
+- Selecciona elementos del modal de detalle
+- Muestra la fecha de la compra
+- **NUEVO:** Si hay `compra.cliente`, muestra la sección con datos de entrega del cliente (igual que en resumen)
+- Muestra los productos comprados con sus detalles
+- Actualiza el total
+- Cierra el historial y abre el modal de detalle
+- Asigna eventos a botones cerrar y volver para regresar al historial
+
+---
+
+## 📊 Flujo de compra ACTUALIZADO
+
+1. **Carrito:**
+   - Usuario agrega productos
+   - Carrito los guarda en localStorage
+
+2. **Click "Comprar Ahora":**
+   - `comprarCarrito()` llama `mostrarFormularioCompra()`
+   - Se abre modal con formulario
+   - Correo pre-rellenado del usuario logueado
+
+3. **Usuario completa formulario:**
+   - Nombres, teléfono, dirección, ciudad, departamento, código postal, método de pago
+   - Hace click en "Completar Compra"
+   - Validación de campos
+
+4. **Procesar compra:**
+   - `completarCompra(datosCliente)` se ejecuta
+   - Crea objeto compra con `id`, `fecha`, `productos`, `total`, `cliente`
+   - `guardarCompraUsuario()` guarda en localStorage bajo el usuario
+   - `renderizarResumenCompra()` muestra resumen CON datos del cliente
+   - Carrito se vacía
+
+5. **Historial:**
+   - Usuario puede ver su historial de compras
+   - Cada compra muestra los datos de entrega que registró
+
+---
+
+## 💾 Estructura localStorage actualizada
+
+```
+localStorage {
+  "productos-en-carrito": [
+    { id: 1, titulo: "...", precio: 10, cantidad: 2, ... },
+    { id: 2, titulo: "...", precio: 20, cantidad: 1, ... }
+  ],
+  
+  "usuarios": {
+    "user1": { nombre: "user1", password: "...", email: "..." },
+    "user2": { ... }
+  },
+  
+  "historial-compras": {
+    "user1": [
+      {
+        id: 1705430400000,
+        fecha: "16/1/2026, 10:30:45",
+        productos: [ ... ],
+        total: 50.00,
+        cliente: {
+          nombres: "Juan Pérez",
+          correo: "juan@email.com",
+          telefono: "3201234567",
+          direccion: "Calle 10 #20-30",
+          ciudad: "Bogotá",
+          departamento: "Cundinamarca",
+          codigoPostal: "110111",
+          metodoPago: "tarjeta"
+        }
+      }
+    ],
+    "user2": [ ... ]
+  }
+}
+```
