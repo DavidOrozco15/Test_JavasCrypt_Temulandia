@@ -119,30 +119,45 @@ function comprarCarrito() {
         return;
     }
 
+    // Mostrar formulario de datos de entrega
+    mostrarFormularioCompra();
+}
+
+// NUEVO: Mostrar formulario de compra
+function mostrarFormularioCompra() {
+    const modalFormulario = document.querySelector('#modal-formulario-compra');
+    const inputCorreo = document.querySelector('#correo');
+    
+    if (!modalFormulario) return;
+    
+    // Pre-llenar el correo con el del usuario logueado
+    inputCorreo.value = obtenerNombreUsuario();
+    
+    // Mostrar modal
+    modalFormulario.classList.remove('disabled');
+    modalFormulario.setAttribute('aria-hidden', 'false');
+}
+
+// NUEVO: Completar la compra con datos del formulario
+function completarCompra(datosCliente) {
     // Snapshot de la compra
     const productosComprados = productosEnCarrito.map(p => ({ ...p }));
     const totalCompra = productosEnCarrito.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
 
-    // COPILOT: Guardar la compra en el historial de compras del usuario actual (MODIFICADO POR COPILOT)
+    // Crear objeto de compra con datos del cliente
     const compra = {
         id: Date.now(),
         fecha: new Date().toLocaleString('es-ES'),
         productos: productosComprados,
-        total: totalCompra
+        total: totalCompra,
+        cliente: datosCliente  // Incluir datos del cliente
     };
     
-    console.log("DEBUG: Antes de guardar compra");
-    console.log("Usuario actual:", obtenerUsuarioActual());
-    console.log("Historial antes:", obtenerHistorialUsuario());
-    
-    const resultado = guardarCompraUsuario(compra);
-    
-    console.log("Resultado guardarCompraUsuario:", resultado);
-    console.log("Historial después:", obtenerHistorialUsuario());
-    console.log("localStorage completo:", localStorage.getItem("historial-compras"));
+    // Guardar compra
+    guardarCompraUsuario(compra);
 
-    // Renderizar resumen antes de vaciar
-    renderizarResumenCompra(productosComprados, totalCompra);
+    // Renderizar resumen con datos del cliente
+    renderizarResumenCompra(productosComprados, totalCompra, datosCliente);
 
     // Vaciar carrito y persistir
     productosEnCarrito.length = 0;
@@ -154,9 +169,13 @@ function comprarCarrito() {
     contenedorCarritoProductos.classList.add("disabled");
     contenedorCarritoAcciones.classList.add("disabled");
     contenedorCarritoComprado.classList.add("disabled");
+    
+    // Cerrar formulario
+    const modalFormulario = document.querySelector('#modal-formulario-compra');
+    modalFormulario.classList.add('disabled');
+}
 
-
-function renderizarResumenCompra(productosComprados, total) {
+function renderizarResumenCompra(productosComprados, total, datosCliente = null) {
     const resumenContenedor = document.querySelector('#carrito-resumen');
     const lista = document.querySelector('#resumen-lista');
     const totalSpan = document.querySelector('#resumen-total');
@@ -164,6 +183,36 @@ function renderizarResumenCompra(productosComprados, total) {
     if (!resumenContenedor || !lista || !totalSpan) return;
 
     lista.innerHTML = '';
+    
+    // Si hay datos del cliente, mostrarlos primero
+    if (datosCliente) {
+        const seccionCliente = document.createElement('div');
+        seccionCliente.className = 'resumen-seccion-cliente';
+        seccionCliente.innerHTML = `
+            <h3>Información de Entrega</h3>
+            <div class="resumen-cliente-info">
+                <p><strong>Nombres:</strong> ${datosCliente.nombres}</p>
+                <p><strong>Correo:</strong> ${datosCliente.correo}</p>
+                <p><strong>Teléfono:</strong> ${datosCliente.telefono}</p>
+                <p><strong>Dirección:</strong> ${datosCliente.direccion}</p>
+                <p><strong>Ciudad:</strong> ${datosCliente.ciudad}</p>
+                <p><strong>Departamento:</strong> ${datosCliente.departamento}</p>
+                <p><strong>Código Postal:</strong> ${datosCliente.codigoPostal}</p>
+                <p><strong>Método de Pago:</strong> ${datosCliente.metodoPago === 'efectivo' ? 'Efectivo' : 'Tarjeta'}</p>
+            </div>
+        `;
+        lista.appendChild(seccionCliente);
+        
+        // Agregar separador
+        const separador = document.createElement('hr');
+        lista.appendChild(separador);
+    }
+    
+    // Mostrar productos
+    const seccionProductos = document.createElement('div');
+    seccionProductos.className = 'resumen-seccion-productos';
+    seccionProductos.innerHTML = '<h3>Productos Comprados</h3>';
+    
     productosComprados.forEach(p => {
         const item = document.createElement('div');
         item.classList.add('resumen-item');
@@ -176,8 +225,9 @@ function renderizarResumenCompra(productosComprados, total) {
             </div>
             <div class="resumen-subtotal">$${(p.precio * p.cantidad).toFixed(2)}</div>
         `;
-        lista.appendChild(item);
+        seccionProductos.appendChild(item);
     });
+    lista.appendChild(seccionProductos);
 
     totalSpan.innerText = `$${Number(total).toFixed(2)}`;
     resumenContenedor.classList.remove('disabled');
@@ -192,7 +242,6 @@ function renderizarResumenCompra(productosComprados, total) {
         // mostrar mensaje de gracias
         contenedorCarritoComprado.classList.remove('disabled');
     });
-}
 }
 
 // ===== COPILOT: FUNCIONES DEL HISTORIAL DE COMPRAS (AGREGADAS POR COPILOT) =====
@@ -261,7 +310,7 @@ function mostrarHistorial() {
 }
 
 function mostrarDetalleCompra(compraId) {
-    const compra = historialCompras.find(c => c.id === compraId);
+    const compra = obtenerHistorialUsuario().find(c => c.id === compraId);
     if (!compra) return;
 
     const modalDetalle = document.querySelector('#modal-detalle-compra');
@@ -274,6 +323,35 @@ function mostrarDetalleCompra(compraId) {
 
     detalleFecha.innerHTML = `<strong>Fecha:</strong> ${compra.fecha}`;
     detalleProductos.innerHTML = '';
+    
+    // Si hay datos del cliente, mostrarlos primero
+    if (compra.cliente) {
+        const seccionCliente = document.createElement('div');
+        seccionCliente.className = 'resumen-seccion-cliente';
+        seccionCliente.innerHTML = `
+            <h3>Información de Entrega</h3>
+            <div class="resumen-cliente-info">
+                <p><strong>Nombres:</strong> ${compra.cliente.nombres}</p>
+                <p><strong>Correo:</strong> ${compra.cliente.correo}</p>
+                <p><strong>Teléfono:</strong> ${compra.cliente.telefono}</p>
+                <p><strong>Dirección:</strong> ${compra.cliente.direccion}</p>
+                <p><strong>Ciudad:</strong> ${compra.cliente.ciudad}</p>
+                <p><strong>Departamento:</strong> ${compra.cliente.departamento}</p>
+                <p><strong>Código Postal:</strong> ${compra.cliente.codigoPostal}</p>
+                <p><strong>Método de Pago:</strong> ${compra.cliente.metodoPago === 'efectivo' ? 'Efectivo' : 'Tarjeta'}</p>
+            </div>
+        `;
+        detalleProductos.appendChild(seccionCliente);
+        
+        // Agregar separador
+        const separador = document.createElement('hr');
+        detalleProductos.appendChild(separador);
+    }
+    
+    // Mostrar productos
+    const seccionProductos = document.createElement('div');
+    seccionProductos.className = 'resumen-seccion-productos';
+    seccionProductos.innerHTML = '<h3>Productos Comprados</h3>';
 
     compra.productos.forEach(p => {
         const item = document.createElement('div');
@@ -287,8 +365,10 @@ function mostrarDetalleCompra(compraId) {
             </div>
             <div class="detalle-subtotal">$${(p.precio * p.cantidad).toFixed(2)}</div>
         `;
-        detalleProductos.appendChild(item);
+        seccionProductos.appendChild(item);
     });
+    
+    detalleProductos.appendChild(seccionProductos);
 
     detalleTotal.innerText = `$${Number(compra.total).toFixed(2)}`;
 
@@ -336,6 +416,71 @@ function actualizarBotonLogout() {
             botonLogout.style.display = "none";
         }
     }
+}
+
+// NUEVO: Manejadores del formulario de compra
+const modalFormulario = document.querySelector('#modal-formulario-compra');
+const formCompra = document.querySelector('#form-compra');
+const cerrarFormulario = document.querySelector('#cerrar-formulario');
+const formularioOverlay = document.querySelector('.formulario-overlay');
+
+if (cerrarFormulario) {
+    cerrarFormulario.addEventListener('click', () => {
+        modalFormulario.classList.add('disabled');
+    });
+}
+
+if (formularioOverlay) {
+    formularioOverlay.addEventListener('click', () => {
+        modalFormulario.classList.add('disabled');
+    });
+}
+
+if (formCompra) {
+    formCompra.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const nombres = document.querySelector('#nombres').value.trim();
+        const correo = document.querySelector('#correo').value.trim();
+        const telefono = document.querySelector('#telefono').value.trim();
+        const direccion = document.querySelector('#direccion').value.trim();
+        const ciudad = document.querySelector('#ciudad').value.trim();
+        const departamento = document.querySelector('#departamento').value.trim();
+        const codigoPostal = document.querySelector('#codigo-postal').value.trim();
+        const metodoPago = document.querySelector('#metodo-pago').value;
+        const msgError = document.querySelector('#form-error');
+        
+        // Validar campos obligatorios
+        if (!nombres || !correo || !telefono || !direccion || !ciudad || !departamento || !codigoPostal || !metodoPago) {
+            msgError.textContent = 'Por favor completa todos los campos.';
+            return;
+        }
+        
+        // Validar teléfono (números)
+        if (!/^\d{7,}$/.test(telefono.replace(/\s|-/g, ''))) {
+            msgError.textContent = 'Teléfono inválido.';
+            return;
+        }
+        
+        // Si todo está bien, completar la compra
+        msgError.textContent = '';
+        
+        const datosCliente = {
+            nombres,
+            correo,
+            telefono,
+            direccion,
+            ciudad,
+            departamento,
+            codigoPostal,
+            metodoPago
+        };
+        
+        completarCompra(datosCliente);
+        
+        // Limpiar formulario
+        formCompra.reset();
+    });
 }
 
 // Llamar al cargar la página
