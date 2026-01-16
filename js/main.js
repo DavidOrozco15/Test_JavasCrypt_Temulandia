@@ -245,3 +245,115 @@ window.addEventListener('keydown', (e)=>{
         cerrarModal();
     }
 });
+
+// ===== COPILOT: MANEJADORES DE AUTENTICACIÓN (AGREGADO POR COPILOT) =====
+const botonLogin = document.querySelector("#boton-login");
+const modalAuth = document.querySelector("#modal-auth");
+const cerrarAuth = document.querySelector("#cerrar-auth");
+const panelLogin = document.querySelector("#panel-login");
+const panelRegistro = document.querySelector("#panel-registro");
+const btnIrRegistro = document.querySelector("#btn-ir-registro");
+const btnIrLogin = document.querySelector("#btn-ir-login");
+const formLogin = document.querySelector("#form-login");
+const formRegistro = document.querySelector("#form-registro");
+const textoLogin = document.querySelector("#texto-login");
+const overlayAuth = document.querySelector(".modal-auth-overlay");
+
+// Abre/cierra el modal de autenticación
+if (botonLogin) {
+    botonLogin.addEventListener("click", () => {
+        if (hayUsuarioLogueado()) {
+            cerrarSesion();
+        } else {
+            modalAuth.classList.remove("disabled");
+            panelLogin.classList.add("active");
+            panelRegistro.classList.remove("active");
+        }
+    });
+}
+
+// Cerrar modal al clickear el botón cerrar o el overlay
+if (cerrarAuth) cerrarAuth.addEventListener("click", () => modalAuth.classList.add("disabled"));
+if (overlayAuth) overlayAuth.addEventListener("click", () => modalAuth.classList.add("disabled"));
+
+// Cambiar entre paneles de login y registro
+if (btnIrRegistro) {
+    btnIrRegistro.addEventListener("click", (e) => {
+        e.preventDefault();
+        panelLogin.classList.remove("active");
+        panelRegistro.classList.add("active");
+    });
+}
+
+if (btnIrLogin) {
+    btnIrLogin.addEventListener("click", (e) => {
+        e.preventDefault();
+        panelRegistro.classList.remove("active");
+        panelLogin.classList.add("active");
+    });
+}
+
+// Manejar envío del formulario de login
+if (formLogin) {
+    formLogin.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.querySelector("#email-login").value.trim();
+        const contraseña = document.querySelector("#password-login").value;
+        const msgError = document.querySelector("#msg-login-error");
+
+        const resultado = loginUsuario(email, contraseña);
+        if (resultado.exito) {
+            msgError.textContent = "";
+            formLogin.reset();
+            modalAuth.classList.add("disabled");
+            actualizarBotonLogin();
+            location.reload(); // Recargar para actualizar carrito con usuario logueado
+        } else {
+            msgError.textContent = resultado.mensaje;
+        }
+    });
+}
+
+// Manejar envío del formulario de registro
+if (formRegistro) {
+    formRegistro.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.querySelector("#email-registro").value.trim();
+        const contraseña = document.querySelector("#password-registro").value;
+        const confirmacion = document.querySelector("#password-confirm").value;
+        const msgError = document.querySelector("#msg-registro-error");
+
+        if (contraseña !== confirmacion) {
+            msgError.textContent = "Las contraseñas no coinciden.";
+            return;
+        }
+
+        const resultado = registrarUsuario(email, contraseña);
+        if (resultado.exito) {
+            msgError.textContent = "";
+            // Hacer login automático después del registro
+            loginUsuario(email, contraseña);
+            formRegistro.reset();
+            modalAuth.classList.add("disabled");
+            actualizarBotonLogin();
+            location.reload();
+        } else {
+            msgError.textContent = resultado.mensaje;
+        }
+    });
+}
+
+// Actualizar el botón login para mostrar email del usuario o volver al login
+function actualizarBotonLogin() {
+    if (hayUsuarioLogueado()) {
+        const usuario = obtenerNombreUsuario();
+        textoLogin.textContent = "Cerrar Sesión";
+        botonLogin.title = `Sesión: ${usuario}`;
+    } else {
+        textoLogin.textContent = "Iniciar Sesión";
+        botonLogin.title = "Abre el modal de login";
+    }
+}
+
+// Llamar al cargar la página
+actualizarBotonLogin();

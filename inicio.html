@@ -52,7 +52,10 @@
                     <li><a class="boton-menu boton-carrito" href="./carrito.html">
                         <img src="./img/carrito.png" alt="Carrito" width="20" height="20">
                         Carrito <span id="numerito" class="numerito">0</span></a></li>
-                </ul>
+                    <!-- COPILOT: Botón de login/logout (AGREGADO POR COPILOT) -->
+                    <li><button id="boton-login" class="boton-menu boton-login">
+                        <img src="./img/usuario.png" alt="Login" width="20" height="20">
+                        <span id="texto-login">Iniciar Sesión</span></button></li>
             </nav>
             <footer>
                 <p class="texto-footer">© 2025 Dyonix</p>
@@ -73,7 +76,40 @@
             </div>
         </div>
 
+        <!-- COPILOT: Modal de Login/Registro (AGREGADO POR COPILOT) -->
+        <div id="modal-auth" class="modal-auth disabled" aria-hidden="true">
+            <div class="modal-auth-overlay"></div>
+            <div class="modal-auth-contenido">
+                <button id="cerrar-auth" class="cerrar-modal" aria-label="Cerrar">×</button>
+                <h2 id="titulo-auth">Iniciar Sesión</h2>
+                
+                <!-- Pestaña: Login -->
+                <div id="panel-login" class="auth-panel active">
+                    <form id="form-login">
+                        <input type="email" id="email-login" placeholder="Email" required>
+                        <input type="password" id="password-login" placeholder="Contraseña" required>
+                        <button type="submit" class="boton-auth">Iniciar Sesión</button>
+                    </form>
+                    <p class="auth-switch">¿No tienes cuenta? <button type="button" id="btn-ir-registro" class="link-btn">Regístrate aquí</button></p>
+                    <p id="msg-login-error" class="auth-error"></p>
+                </div>
+
+                <!-- Pestaña: Registro -->
+                <div id="panel-registro" class="auth-panel">
+                    <form id="form-registro">
+                        <input type="email" id="email-registro" placeholder="Email" required>
+                        <input type="password" id="password-registro" placeholder="Contraseña (mín. 4 caracteres)" required>
+                        <input type="password" id="password-confirm" placeholder="Confirmar contraseña" required>
+                        <button type="submit" class="boton-auth">Registrarse</button>
+                    </form>
+                    <p class="auth-switch">¿Ya tienes cuenta? <button type="button" id="btn-ir-login" class="link-btn">Inicia sesión aquí</button></p>
+                    <p id="msg-registro-error" class="auth-error"></p>
+                </div>
+            </div>
+        </div>
+
     </div>
+    <script src="./js/auth.js"></script>
     <script src="./js/main.js"></script>
     <script src="./js/menu.js"></script>
 </body>

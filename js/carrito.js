@@ -1,7 +1,7 @@
 let productosEnCarrito = JSON.parse(localStorage.getItem("productos-en-carrito")) || [];
-// COPILOT: Variable para guardar el historial de todas las compras (AGREGADA POR COPILOT)
-// Puede eliminarse: SÍ, sin afectar la funcionalidad base del carrito
-let historialCompras = JSON.parse(localStorage.getItem("historial-compras")) || [];
+// COPILOT: Variable para guardar el historial de compras (MODIFICADA POR COPILOT para ser por usuario)
+// Nota: Ahora obtenerHistorialUsuario() se llama directamente en mostrarHistorial()
+let historialCompras = [];
 
 const contenedorCarritoVacio = document.querySelector("#carrito-vacio");
 const contenedorCarritoProductos = document.querySelector("#carrito-productos");
@@ -113,20 +113,33 @@ function comprarCarrito() {
 
     if (!productosEnCarrito || productosEnCarrito.length === 0) return;
 
+    // Verificar si hay usuario logueado
+    if (!hayUsuarioLogueado()) {
+        alert("Debes iniciar sesión para completar la compra.");
+        return;
+    }
+
     // Snapshot de la compra
     const productosComprados = productosEnCarrito.map(p => ({ ...p }));
     const totalCompra = productosEnCarrito.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
 
-    // COPILOT: Guardar la compra en el historial de compras (AGREGADO POR COPILOT)
-    // Puede eliminarse: SÍ, pero afectaría la funcionalidad del historial
+    // COPILOT: Guardar la compra en el historial de compras del usuario actual (MODIFICADO POR COPILOT)
     const compra = {
         id: Date.now(),
         fecha: new Date().toLocaleString('es-ES'),
         productos: productosComprados,
         total: totalCompra
     };
-    historialCompras.push(compra);
-    localStorage.setItem("historial-compras", JSON.stringify(historialCompras));
+    
+    console.log("DEBUG: Antes de guardar compra");
+    console.log("Usuario actual:", obtenerUsuarioActual());
+    console.log("Historial antes:", obtenerHistorialUsuario());
+    
+    const resultado = guardarCompraUsuario(compra);
+    
+    console.log("Resultado guardarCompraUsuario:", resultado);
+    console.log("Historial después:", obtenerHistorialUsuario());
+    console.log("localStorage completo:", localStorage.getItem("historial-compras"));
 
     // Renderizar resumen antes de vaciar
     renderizarResumenCompra(productosComprados, totalCompra);
@@ -193,13 +206,28 @@ function mostrarHistorial() {
     const historiallista = document.querySelector('#historial-lista');
     const historiallVacio = document.querySelector('#historial-vacio');
 
-    if (!modalHistorial) return;
+    console.log("=== DEBUG mostrarHistorial ===");
+    console.log("Modal historial encontrado:", !!modalHistorial);
+    console.log("Lista historial encontrada:", !!historiallista);
+    console.log("Historial vacío elemento:", !!historiallVacio);
 
-    if (historialCompras && historialCompras.length > 0) {
+    if (!modalHistorial) {
+        console.error("ERROR: No se encontró #modal-historial en el DOM");
+        return;
+    }
+
+    // COPILOT: Obtener historial del usuario actual (MODIFICADO POR COPILOT)
+    console.log("hayUsuarioLogueado():", hayUsuarioLogueado());
+    const historialActual = hayUsuarioLogueado() ? obtenerHistorialUsuario() : [];
+    
+    console.log("historialActual:", historialActual);
+    console.log("localStorage historial-compras:", localStorage.getItem("historial-compras"));
+
+    if (historialActual && historialActual.length > 0) {
         historiallVacio.classList.add('disabled');
         historiallista.innerHTML = '';
 
-        historialCompras.forEach((compra, index) => {
+        historialActual.forEach((compra, index) => {
             const item = document.createElement('div');
             item.classList.add('historial-item');
             item.innerHTML = `
@@ -213,6 +241,8 @@ function mostrarHistorial() {
             item.addEventListener('click', () => mostrarDetalleCompra(compra.id));
             historiallista.appendChild(item);
         });
+        
+        modalHistorial.classList.remove('disabled');
     } else {
         historiallVacio.classList.remove('disabled');
         historiallista.innerHTML = '';
@@ -286,3 +316,27 @@ function mostrarDetalleCompra(compraId) {
     }
 }
 // ===== FIN DE CÓDIGO COPILOT =====
+
+// ===== COPILOT: MANEJADOR DE BOTÓN CERRAR SESIÓN (AGREGADO POR COPILOT) =====
+const botonLogout = document.querySelector("#boton-logout");
+if (botonLogout) {
+    botonLogout.addEventListener("click", () => {
+        if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+            cerrarSesion();
+        }
+    });
+}
+
+// Mostrar/ocultar botón de logout según sesión
+function actualizarBotonLogout() {
+    if (botonLogout) {
+        if (hayUsuarioLogueado()) {
+            botonLogout.style.display = "block";
+        } else {
+            botonLogout.style.display = "none";
+        }
+    }
+}
+
+// Llamar al cargar la página
+actualizarBotonLogout();
