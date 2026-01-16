@@ -155,6 +155,11 @@ function completarCompra(datosCliente) {
     
     // Guardar compra
     guardarCompraUsuario(compra);
+    
+    // Registrar frecuencia de cada producto comprado
+    productosEnCarrito.forEach(producto => {
+        registrarFrecuenciaCompra(producto.id);
+    });
 
     // Renderizar resumen con datos del cliente
     renderizarResumenCompra(productosComprados, totalCompra, datosCliente);
