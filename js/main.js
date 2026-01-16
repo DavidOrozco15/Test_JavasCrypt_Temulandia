@@ -18,8 +18,10 @@ async function obtenerProductos() {
             precio: producto.price
         }));
 
+        // Ordenar productos por frecuencia de compra (si hay usuario logueado)
+        const productosOrdenados = ordenarPorFrecuencia(productosTransformados);
         
-        cargarProductos(productosTransformados);
+        cargarProductos(productosOrdenados);
 
         
         window.productos = productosTransformados;
