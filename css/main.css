@@ -383,6 +383,11 @@ main {
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     position: relative;
 }
+
+.botonesTest{
+    margin-top: 50px;
+    width: 140px;
+}
 .resumen-lista {
     display: flex;
     flex-direction: column;
