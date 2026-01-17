@@ -39,6 +39,8 @@ const tituloPrincipal = document.querySelector("#titulo-principal");
 let botonesAgregar = document.querySelectorAll(".producto-agregar");
 const numerito = document.querySelector("#numerito");
 const buscador = document.querySelector("#buscador");
+let botonSiguiente = document.querySelector("#botonSiguiente");
+let botonAnterior = document.querySelector("#botonAnterior");
 
 if (buscador) {
     buscador.addEventListener("input", filtrarProductos);
@@ -82,16 +84,16 @@ function ordenarProductos(lista, criterio) {
         case "title-desc":
             return copia.sort((a, b) => b.titulo.localeCompare(a.titulo));
         default:
-            return copia; // sin ordenar
+            return copia; 
     }
 }
 
 function cargarProductos(productosElegidos) {
 
+    
     contenedorProductos.innerHTML = "";
-
-    productosElegidos.forEach(producto => {
-
+    productosElegidos.slice(0, 6).forEach(producto => {
+        
         const div = document.createElement("div");
         div.classList.add("producto");
         div.innerHTML = `
@@ -113,6 +115,7 @@ function cargarProductos(productosElegidos) {
 
     actualizarBotonesAgregar();
 }
+
 
 
 botonesCategorias.forEach(boton => {
@@ -248,7 +251,7 @@ window.addEventListener('keydown', (e)=>{
     }
 });
 
-// ===== COPILOT: MANEJADORES DE AUTENTICACIÓN (AGREGADO POR COPILOT) =====
+
 const botonLogin = document.querySelector("#boton-login");
 const modalAuth = document.querySelector("#modal-auth");
 const cerrarAuth = document.querySelector("#cerrar-auth");
